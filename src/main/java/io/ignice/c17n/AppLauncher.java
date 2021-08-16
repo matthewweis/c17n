@@ -9,8 +9,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-import static reactor.core.publisher.Mono.fromSupplier;
+import static reactor.core.publisher.Mono.just;
 import static reactor.core.publisher.Mono.using;
 
 public class AppLauncher {
@@ -27,14 +28,18 @@ public class AppLauncher {
 
     public static void main(String[] args) {
         using(lazyContext(), Mono::just, AbstractApplicationContext::close)
-                .flatMap(context -> fromSupplier(() -> context.getBean(Gateway.class)).doOnError(report("context"))
-                        .flatMap(gateway -> fromSupplier(gateway::run).doOnError(report("application")))
-                        .doOnError(throwable -> log.error("An unspecified error occurred.", throwable)))
+                .flatMap(context -> just(context.getBean(Gateway.class)).transform(attachErrorHandler("context")))
+                .flatMap(gateway -> gateway.run().transform(attachErrorHandler("application")))
+                .transform(attachErrorHandler("unknown"))
                 .block();
     }
 
     private static Callable<? extends AnnotationConfigApplicationContext> lazyContext() {
         return () -> new AnnotationConfigApplicationContext(AppConfig.class);
+    }
+
+    private static <T> Function<Mono<T>, Mono<T>> attachErrorHandler(@NonNull String info) {
+        return mono -> mono.doOnError(report(info)).onErrorResume(throwable -> Mono.empty());
     }
 
     private static Consumer<? super Throwable> report(@NonNull String info) {
