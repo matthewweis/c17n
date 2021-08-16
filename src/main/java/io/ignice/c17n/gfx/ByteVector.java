@@ -56,17 +56,28 @@ public interface ByteVector {
 
             private final List<byte[]> sparseSlices = Collections.synchronizedList(new LinkedList<>());
 
+            private static byte[] flatten(@NonNull List<byte[]> bytes) {
+                final int length = bytes.stream().mapToInt(slice -> slice.length).sum();
+                final byte[] result = new byte[length];
+
+                int offset = 0;
+                for (byte[] slice : bytes) {
+                    System.arraycopy(slice, 0, result, offset, slice.length);
+                    offset += slice.length;
+                }
+
+                return result;
+            }
+
             @ToString
             @EqualsAndHashCode
             private static final class LinkedSliceNode {
 
                 private static final AtomicReferenceFieldUpdater<LinkedSliceNode, LinkedSliceNode> nextUpdater =
                         AtomicReferenceFieldUpdater.newUpdater(LinkedSliceNode.class, LinkedSliceNode.class, "next");
-
+                private final byte[] slice;
                 // DO NOT ACCESS DIRECTLY, use the corresponding AtomicReferenceFieldUpdater instead.
                 private volatile LinkedSliceNode next;
-
-                private final byte[] slice;
 
                 private LinkedSliceNode(byte[] slice) {
                     this.slice = slice;
@@ -87,19 +98,6 @@ public interface ByteVector {
                 public @NonNull Optional<LinkedSliceNode> next() {
                     return Optional.ofNullable(nextUpdater.get(next));
                 }
-            }
-
-            private static byte[] flatten(@NonNull List<byte[]> bytes) {
-                final int length = bytes.stream().mapToInt(slice -> slice.length).sum();
-                final byte[] result = new byte[length];
-
-                int offset = 0;
-                for (byte[] slice : bytes) {
-                    System.arraycopy(slice, 0, result, offset, slice.length);
-                    offset += slice.length;
-                }
-
-                return result;
             }
         }
     }

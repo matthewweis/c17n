@@ -45,31 +45,31 @@ public class GIF {
     // "," = 0x2C
     // prefixes IMAGE (which itself is IMAGE_DESCRIPTOR optionally followed by Color Table then values)
 
-        // IMAGE_HEADER (aka IMAGE_DESCRIPTOR)
-        // (11 bytes, fixed length)
-        // IMAGE_HEADER = 11 bytes where the last byte is a GCT flag
-        // todo http://ntfs.com/gif-signature-format.htm
+    // IMAGE_HEADER (aka IMAGE_DESCRIPTOR)
+    // (11 bytes, fixed length)
+    // IMAGE_HEADER = 11 bytes where the last byte is a GCT flag
+    // todo http://ntfs.com/gif-signature-format.htm
 
-        // TODO WARNING: IN EXAMPLE A SUB-BLOCK APPEARS HERE?
+    // TODO WARNING: IN EXAMPLE A SUB-BLOCK APPEARS HERE?
 
-        // LOCAL_COLOR_TABLE
-        // (? bytes, optional)
+    // LOCAL_COLOR_TABLE
+    // (? bytes, optional)
 
-        // IMAGE_DATA
-        // (todo bytes variable?)
-        // IMAGE_DATA = BIT_WIDTH LINKED_LIST_OF_LZW_SUB_BLOCKS
-        //  BIT_WIDTH ∈ [0x02, 0xFF] (1 byte)
-        //  BIT_WIDTH gives the bit-width of the unencoded symbols
-        //  note that BIT_WIDTH MUST be greater than or equal to 2 (even for bi-color images))
+    // IMAGE_DATA
+    // (todo bytes variable?)
+    // IMAGE_DATA = BIT_WIDTH LINKED_LIST_OF_LZW_SUB_BLOCKS
+    //  BIT_WIDTH ∈ [0x02, 0xFF] (1 byte)
+    //  BIT_WIDTH gives the bit-width of the unencoded symbols
+    //  note that BIT_WIDTH MUST be greater than or equal to 2 (even for bi-color images))
 
     // BEGIN_EXTENSION_BLOCK (MAGIC_NUMBER)
     // (1 byte)
     // "!" = 0x21
     // prefixes EXTENSION_BLOCK
 
-        // EXTENSION_BLOCK
-        // (8 bytes, fixed)
-        // todo http://ntfs.com/gif-signature-format.htm
+    // EXTENSION_BLOCK
+    // (8 bytes, fixed)
+    // todo http://ntfs.com/gif-signature-format.htm
 
     // TRAILER (MAGIC_NUMBER)
     // (1 byte)
