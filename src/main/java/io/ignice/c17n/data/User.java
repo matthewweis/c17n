@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 
 /**
  * Discord account DTO.
+ *
  * @see UserReadConverter
  * @see UserWriteConverter
  */

@@ -28,8 +28,8 @@ public class AppLauncher {
     public static void main(String[] args) {
         using(lazyContext(), Mono::just, AbstractApplicationContext::close)
                 .flatMap(context -> fromSupplier(() -> context.getBean(Gateway.class)).doOnError(report("context"))
-                .flatMap(gateway -> fromSupplier(gateway::run).doOnError(report("application")))
-                .doOnError(throwable -> log.error("An unspecified error occurred.", throwable)))
+                        .flatMap(gateway -> fromSupplier(gateway::run).doOnError(report("application")))
+                        .doOnError(throwable -> log.error("An unspecified error occurred.", throwable)))
                 .block();
     }
 

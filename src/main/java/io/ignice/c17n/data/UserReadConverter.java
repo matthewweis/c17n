@@ -10,6 +10,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Canonical {@link Converter} :: {@link Row} -> {@link User} implementation.
+ *
  * @see User
  * @see UserWriteConverter
  */
