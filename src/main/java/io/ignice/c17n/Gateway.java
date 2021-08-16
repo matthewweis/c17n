@@ -29,7 +29,7 @@ public class Gateway {
                     final Flux<Message> onMessage = client.on(MessageCreateEvent.class)
                             .flatMap(event -> {
                                 final var message = event.getMessage();
-                                return message.getContent().equals("!ping")
+                                return message.getContent().equals("ping!")
                                         ? message.getChannel().flatMap(channel -> channel.createMessage("pong!"))
                                         : Mono.empty();
                             });
