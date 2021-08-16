@@ -1,3 +1,18 @@
+# java
+*.class
+*.jar
+hs_err_pid*
+
+# logback
+*.log
+log/
+logs/
+
+# package files
+*.zip
+*.tar.gz
+*.rar
+
 # intellij
 .idea/
 *.iml
@@ -8,9 +23,18 @@
 .project
 .settings/
 
-# maven
-log/
+# maven (credit: https://github.com/github/gitignore/blob/master/Maven.gitignore)
 target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# https://github.com/takari/maven-wrapper#usage-without-binary-jar
+.mvn/wrapper/maven-wrapper.jar
 
 # mac
 .DS_Store
