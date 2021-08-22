@@ -39,8 +39,6 @@
 <!--    </profiles>-->
 
     <properties>
-        <app.profile>internal</app.profile>
-
         <!-- main class -->
         <exec.mainClass>io.ignice.c17n.AppLauncher</exec.mainClass>
 
