@@ -4,6 +4,7 @@ import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.Callable;
@@ -14,7 +15,6 @@ import static reactor.core.publisher.Mono.just;
 import static reactor.core.publisher.Mono.using;
 
 public class AppLauncher {
-
 
     private static final Logger log = LoggerFactory.getLogger(AppLauncher.class);
 
@@ -32,10 +32,8 @@ public class AppLauncher {
     }
 
     public static void main(String[] args) throws Exception {
-        // AbstractApplicationContext::close
-        System.out.println("hi");
-        AnnotationConfigApplicationContext appContext = lazyContext().call();
-        AppLauncher launcher = new AppLauncher(appContext.getBean(Gateway.class));
+        final AnnotationConfigApplicationContext appContext = lazyContext().call();
+        final AppLauncher launcher = new AppLauncher(appContext.getBean(Gateway.class));
         launcher.run();
     }
 
@@ -52,8 +50,7 @@ public class AppLauncher {
     }
 
     private void run() {
-        using(lazyContext(), Mono::just, x -> {
-        })
+        using(lazyContext(), Mono::just, AbstractApplicationContext::close)
                 .flatMap(context -> just(gateway).transform(attachErrorHandler("context")))
                 .flatMap(gateway -> gateway.run().transform(attachErrorHandler("application")))
                 .transform(attachErrorHandler("unknown"))

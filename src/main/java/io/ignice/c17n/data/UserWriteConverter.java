@@ -7,8 +7,6 @@ import org.springframework.r2dbc.core.Parameter;
 
 import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Canonical {@link Converter} :: {@link OutboundRow} -> {@link User} implementation.
  *
@@ -21,12 +19,19 @@ public class UserWriteConverter implements Converter<User, OutboundRow> {
     @Override
     public OutboundRow convert(User user) {
         return new OutboundRow(Map.of(
-                "id", Parameter.from(requireNonNull(user.getId())),
-                "wallet", Parameter.from(requireNonNull(user.getWallet())),
-                "created_at", Parameter.from(requireNonNull(user.getCreatedAt())),
-                "updated_at", Parameter.from(requireNonNull(user.getUpdatedAt())),
-                "version", Parameter.from(requireNonNull(user.getVersion()))
+                "id", Parameter.from(user.getId()),
+                "wallet", Parameter.from(user.getWallet()),
+                "created_at", Parameter.from(user.getCreatedAt()),
+                "updated_at", Parameter.from(user.getUpdatedAt()),
+                "version", Parameter.from(user.getVersion())
         ));
+//        return new OutboundRow(Map.of(
+//                "id", Parameter.from(requireNonNull(user.getId())),
+//                "wallet", Parameter.from(requireNonNull(user.getWallet())),
+//                "created_at", Parameter.from(requireNonNull(user.getCreatedAt())),
+//                "updated_at", Parameter.from(requireNonNull(user.getUpdatedAt())),
+//                "version", Parameter.from(requireNonNull(user.getVersion()))
+//        ));
     }
 
 }

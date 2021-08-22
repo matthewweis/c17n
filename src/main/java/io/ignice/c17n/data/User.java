@@ -18,11 +18,11 @@ import java.time.LocalDateTime;
  * @see UserWriteConverter
  */
 @Data
-@Table
 @Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(value = "users")
 public class User {
 
     /**
@@ -40,7 +40,6 @@ public class User {
     @Column("id")
     private Long id; // UUID id given by discord. Can be converted to type Snowflake.
 
-    @Id
     @Column("wallet")
     private Long wallet;
 

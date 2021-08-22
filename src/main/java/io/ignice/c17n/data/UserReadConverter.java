@@ -6,8 +6,6 @@ import org.springframework.data.convert.ReadingConverter;
 
 import java.time.LocalDateTime;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Canonical {@link Converter} :: {@link Row} -> {@link User} implementation.
  *
@@ -20,12 +18,19 @@ public class UserReadConverter implements Converter<Row, User> {
     @Override
     public User convert(Row row) {
         return new User(
-                requireNonNull(row.get("id", Long.class)),
-                requireNonNull(row.get("wallet", Long.class)),
-                requireNonNull(row.get("created_at", LocalDateTime.class)),
-                requireNonNull(row.get("updated_at", LocalDateTime.class)),
-                requireNonNull(row.get("version", Long.class))
+                row.get("id", Long.class),
+                row.get("wallet", Long.class),
+                row.get("created_at", LocalDateTime.class),
+                row.get("updated_at", LocalDateTime.class),
+                row.get("version", Long.class)
         );
+//        return new User(
+//                requireNonNull(row.get("id", Long.class)),
+//                requireNonNull(row.get("wallet", Long.class)),
+//                requireNonNull(row.get("created_at", LocalDateTime.class)),
+//                requireNonNull(row.get("updated_at", LocalDateTime.class)),
+//                requireNonNull(row.get("version", Long.class))
+//        );
     }
 
 }

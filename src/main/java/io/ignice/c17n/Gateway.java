@@ -15,8 +15,11 @@ public class Gateway {
 
     private final DiscordClient discordClient;
 
-    public Gateway(DiscordClient discordClient) {
+    private final AppRepository appRepository;
+
+    public Gateway(DiscordClient discordClient, AppRepository appRepository) {
         this.discordClient = discordClient;
+        this.appRepository = appRepository;
     }
 
     public Mono<Void> run() {
