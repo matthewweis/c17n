@@ -1,4 +1,4 @@
 cd ..
-./mvnw clean validate compile test package -Dapp.token="%1"
+./mvnw clean validate compile test package -Dapp.token="NULL"
 
 cd scripts
