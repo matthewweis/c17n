@@ -6,4 +6,4 @@ if [ $# -lt 1 ]; then
 fi
 
 cd ..
-./mvnw clean compile exec:java package -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+./mvnw clean package -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"

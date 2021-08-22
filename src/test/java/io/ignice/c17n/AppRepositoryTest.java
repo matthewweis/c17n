@@ -26,7 +26,7 @@ class AppRepositoryTest {
     private AppRepository repository;
 
     @Configuration
-    @Import(AppConfig.class)
+    @Import(io.ignice.c17n.Config.class)
     @ComponentScan("io.ignice.c17n")
     static class Config extends AbstractR2dbcConfiguration {
         @Bean

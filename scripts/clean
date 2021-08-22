@@ -1,4 +1,0 @@
-#!/bin/sh
-cd ..
-./mvnw clean
-cd scripts

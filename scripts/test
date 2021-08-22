@@ -1,4 +1,3 @@
 #!/bin/sh
 cd ..
-./mvnw clean validate compile test package -Dapp.token="NULL"
-cd scripts
+./mvnw clean test -Dapp.token="NULL"
