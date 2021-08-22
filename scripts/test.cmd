@@ -1,5 +1,4 @@
 cd ..
-mvnw.cmd clean
-mvnw.cmd package "-Dapp.token=%1"
-mvnw.cmd exec:java -Dexec.mainClass="io.ignice.c17n.AppLauncher" -D internal
+./mvnw clean validate compile test package -Dapp.token="%1"
+
 cd scripts

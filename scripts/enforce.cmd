@@ -1,5 +1,3 @@
 cd ..
-mvnw.cmd clean
-mvnw.cmd package "-Dapp.token=%1"
-mvnw.cmd exec:java -Dexec.mainClass="io.ignice.c17n.AppLauncher" -D internal
+mvnw.cmd verify
 cd scripts
