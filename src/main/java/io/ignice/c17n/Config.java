@@ -20,6 +20,7 @@ import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.reactive.TransactionalOperator;
 
 import java.util.List;
 
@@ -34,8 +35,8 @@ public class Config extends AbstractR2dbcConfiguration {
 
     @Lazy
     @Bean("gateway")
-    public Gateway gateway(DiscordClient client, AppRepository appRepository) {
-        return new Gateway(client, appRepository);
+    public Gateway gateway(DiscordClient client, AppRepository appRepository, TransactionalOperator txOperator) {
+        return new Gateway(client, appRepository, txOperator);
     }
 
     @Lazy
@@ -66,6 +67,11 @@ public class Config extends AbstractR2dbcConfiguration {
     @Bean
     public ReactiveTransactionManager transactionManager(ConnectionFactory connectionFactory) {
         return new R2dbcTransactionManager(connectionFactory);
+    }
+
+    @Bean
+    public TransactionalOperator transactionalOperator(ReactiveTransactionManager transactionManager) {
+        return TransactionalOperator.create(transactionManager);
     }
 
     @Bean
