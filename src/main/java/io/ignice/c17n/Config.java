@@ -2,8 +2,6 @@ package io.ignice.c17n;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
-import io.ignice.c17n.data.UserReadConverter;
-import io.ignice.c17n.data.UserWriteConverter;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +45,8 @@ public class Config extends AbstractR2dbcConfiguration {
 
     @Override
     protected List<Object> getCustomConverters() {
-        return List.of(new UserWriteConverter(), new UserReadConverter());
+//        return List.of(new UserWriteConverter(), new UserReadConverter());
+        return List.of();
     }
 
     @Bean
@@ -84,6 +83,5 @@ public class Config extends AbstractR2dbcConfiguration {
         initializer.setDatabasePopulator(populator);
         return initializer;
     }
-
 
 }

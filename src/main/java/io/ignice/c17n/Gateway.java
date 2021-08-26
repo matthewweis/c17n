@@ -109,13 +109,13 @@ public class Gateway extends ReactiveEventAdapter {
 
     private Flux<Message> listCmd(Mono<MessageChannel> mono) {
         return repo.findAll()
-                .map(user -> format("%d --> %d", user.getId(), user.getWallet()))
+                .map(user -> format("%d --> %d", user.id(), user.wallet()))
                 .flatMap(message -> echo(mono, message));
     }
 
     private Mono<Message> balCmd(Mono<MessageChannel> mono, String key) {
         return mono.flatMap(channel -> repo.findById(Long.getLong(key))
-                .map(User::getWallet)
+                .map(User::wallet)
                 .flatMap(balance -> channel.createMessage(Objects.toString(balance, "NULL"))));
     }
 
@@ -170,8 +170,7 @@ public class Gateway extends ReactiveEventAdapter {
     }
 
     private static User updateWallet(User user, LongUnaryOperator updater) {
-        final long updatedWallet = updater.applyAsLong(user.getWallet());
-        return new User(user.getId(), updatedWallet, user.getCreatedAt(), user.getUpdatedAt(), user.getVersion());
+        return user.updateWallet(updater);
     }
 
 }
