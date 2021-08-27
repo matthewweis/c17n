@@ -46,9 +46,19 @@ class AppRepositoryTest {
         });
     }
 
+    /**
+     * Contains the contents of src/main/resources/schema.sql to rebuild the database between tests.
+     */
     private String schemaSql;
+
+    /**
+     * Contains the contents of src/test/resources/data.sql to clear the database between tests.
+     */
     private String dropSql;
 
+    /**
+     * Contains all {@link User}s stored in the "users" table at the start of each test.
+     */
     private final List<User> fakeUsers = List.of(
             User.of(Snowflake.of(0L), 1L),
             User.of(Snowflake.of(1L), 2L),
@@ -79,7 +89,6 @@ class AppRepositoryTest {
         schemaSql = Files.readString(Path.of(new ClassPathResource("schema.sql").getURI()));
         dropSql = Files.readString(Path.of(new ClassPathResource("drop.sql").getURI()));
     }
-
 
     // https://github.com/spring-projects/spring-data-r2dbc/blob/fe7308100a2d06401fa03eaf3722d5c0e3ad514b/src/main/asciidoc/reference/r2dbc-repositories.adoc
     @BeforeEach
@@ -190,7 +199,7 @@ class AppRepositoryTest {
                 .verifyError(DataIntegrityViolationException.class);
         StepVerifier.create(repository.save(User.of(Snowflake.of(4L), 32L)))
                 .verifyError(DataIntegrityViolationException.class);
-//        // valid insertion
+        // valid insertion
         StepVerifier.create(repository.save(User.of(Snowflake.of(5L), 32L))
                         .then(repository.findUserBySnowflake(Snowflake.of(5L))))
                 .expectNext(User.of(Snowflake.of(5L), 32L))
