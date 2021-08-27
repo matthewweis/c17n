@@ -4,9 +4,10 @@ import discord4j.common.util.Snowflake;
 import io.ignice.c17n.data.User;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -27,12 +28,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-@Slf4j
 @SpringJUnitConfig
 @ExtendWith(SpringExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AppRepositoryTest {
+
+    private static final Logger log = LoggerFactory.getLogger(AppRepositoryTest.class);
 
     static {
         Hooks.onOperatorDebug();
@@ -45,7 +47,6 @@ class AppRepositoryTest {
     private String schemaSql;
     private String dropSql;
 
-    // nulls where database where generate on INSERT (otherwise its UPDATE)
     private final List<User> fakeUsers = List.of(
             User.of(Snowflake.of(0L), 1L),
             User.of(Snowflake.of(1L), 2L),
@@ -59,7 +60,6 @@ class AppRepositoryTest {
 
     @Autowired
     private R2dbcEntityTemplate template;
-
 
     @Configuration
     @ComponentScan("io.ignice.c17n")
@@ -81,7 +81,7 @@ class AppRepositoryTest {
 
     // https://github.com/spring-projects/spring-data-r2dbc/blob/fe7308100a2d06401fa03eaf3722d5c0e3ad514b/src/main/asciidoc/reference/r2dbc-repositories.adoc
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         // setup schema
         template.getDatabaseClient()
                 .sql(schemaSql)
