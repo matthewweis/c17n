@@ -1,6 +1,7 @@
 package io.ignice.c17n;
 
 import discord4j.common.util.Snowflake;
+import io.ignice.c17n.data.MockUser;
 import io.ignice.c17n.data.User;
 import io.r2dbc.h2.H2ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactory;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.test.annotation.DirtiesContext;
@@ -100,6 +102,7 @@ class AppRepositoryTest {
 
     @AfterEach
     void tearDown() {
+        // delete the entire table and schema
         template.getDatabaseClient()
                 .sql(dropSql)
                 .fetch()
@@ -173,4 +176,40 @@ class AppRepositoryTest {
                 .expectNext(User.of(Snowflake.of(4L), 32L))
                 .verifyComplete();
     }
+
+    @Test
+    void databaseEnforcesSnowflakeUniqueness() {
+        // intentional failure
+        StepVerifier.create(repository.save(User.of(Snowflake.of(0L), 32L)))
+                .verifyError(DataIntegrityViolationException.class);
+        StepVerifier.create(repository.save(User.of(Snowflake.of(1L), 32L)))
+                .verifyError(DataIntegrityViolationException.class);
+        StepVerifier.create(repository.save(User.of(Snowflake.of(2L), 32L)))
+                .verifyError(DataIntegrityViolationException.class);
+        StepVerifier.create(repository.save(User.of(Snowflake.of(3L), 32L)))
+                .verifyError(DataIntegrityViolationException.class);
+        StepVerifier.create(repository.save(User.of(Snowflake.of(4L), 32L)))
+                .verifyError(DataIntegrityViolationException.class);
+//        // valid insertion
+        StepVerifier.create(repository.save(User.of(Snowflake.of(5L), 32L))
+                        .then(repository.findUserBySnowflake(Snowflake.of(5L))))
+                .expectNext(User.of(Snowflake.of(5L), 32L))
+                .verifyComplete();
+    }
+
+    @Test
+    void clientEnforcesNonNegativeWallet() {
+        StepVerifier.create(repository.save(User.of(Snowflake.of(5L), -1L))
+                        .then(repository.findUserBySnowflake(Snowflake.of(5L))))
+                .verifyError(IllegalArgumentException.class);
+    }
+
+    @Test
+    void databaseEnforcesNonNegativeWallet() {
+        final User mockUser = new MockUser(null, 5L, -1L, null, null, null);
+        StepVerifier.create(repository.save(mockUser)
+                        .then(repository.findUserBySnowflake(mockUser.snowflake())))
+                .verifyError(DataIntegrityViolationException.class);
+    }
+
 }
