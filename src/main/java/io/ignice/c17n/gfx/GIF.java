@@ -13,6 +13,55 @@ public class GIF {
     // Anatomy of a GIF:
     // [source: http://ntfs.com/gif-signature-format.htm]
 
+//    interface GifDescriptor {
+//        enum Header { GIF87A, GIF89A }
+//        Header header();
+//        void header(Header header);
+//        //
+//        enum LogicalScreenDescriptor {
+//            DIMENSION(),
+//            PACKED_FIELD(),
+//            BACKGROUND_COLOR_INDEX(),
+//            PIXEL_ASPECT_RATIO();
+//
+////            private final long MSB_MASK;
+////            private final long LSB_MASK;
+////
+////            LogicalScreenDescriptor(long msbMask, long lsbMask) {
+////                MSB_MASK = msbMask;
+////                LSB_MASK = lsbMask;
+////            }
+//
+//            enum Dimension {
+//                CANVAS_WIDTH(0xFFFF0000),
+//                CANVAS_HEIGHT(0x0000FFFF);
+//                private final long MASK;
+//                Dimension(long mask) {
+//                    MASK = mask;
+//                }
+//            }
+//
+//            enum PackedField {
+//                GLOBAL_COLOR_TABLE_FLAG(   u8(0b10000000)),
+//                COLOR_RESOLUTION(          u8(0b01110000)),
+//                SORT_FLAG(                 u8(0b00001000)),
+//                SIZE_OF_GLOBAL_COLOR_TABLE(u8(0b00000111));
+//
+//                private final byte MASK;
+//
+//                PackedField(byte mask) {
+//                    MASK = mask;
+//                }
+//            }
+//        }
+//
+//
+//
+//        record ScreenDescriptor(int width, int height, PackedField packedField, int backgroundColorIndex, int pixelAspectRatio) {}
+//        ScreenDescriptor screenDescriptor();
+//        void screenDescriptor(ScreenDescriptor screenDescriptor);
+//    }
+
     // HEADER
     // (6 bytes, fixed length)
     // HEADER = "GIF87a" or "GIF89a"

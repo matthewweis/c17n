@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+    echo Error: a token is required to deploy.
+    exit 1
+fi
+
+#docker build -f Dockerfile -t c17n .
+
+# single node swarm
+#docker swarm join
+
+cd ..
+./mvnw clean package -DskipTests
+mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+#docker-compose build --no-cache --build-args TOKEN=$1
+echo '2'
+docker swarm leave --force
+echo '3'
+docker swarm init --force-new-cluster
+echo '4'
+docker network create --driver=overlay --attachable c17network
+echo '5'
+#docker service create --name postgres
+docker-compose run db
+echo "$1" | docker secret create SECRET_TOKEN -
+#docker-compose run app --secret SECRET_TOKEN
+docker-compose run app --secret SECRET_TOKEN --env SECRET_TOKEN="/run/secrets/postgres-password"
+#docker stack up --prune -c docker-compose.yml c17n
+
+#docker-compose build --no-cache
+#docker-compose up --force-recreate --env
+
+#docker-compose build --no-cache
+#docker-compose up --force-recreate -e "TOKEN=$1"
+
+#cd ..
+##./mvnw clean compile exec:java package -DskipTests -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+#./mvnw clean package -DskipTests -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+## extract libraries from fat jar
+#mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+#docker-compose build --no-cache
+#docker-compose up --force-recreate

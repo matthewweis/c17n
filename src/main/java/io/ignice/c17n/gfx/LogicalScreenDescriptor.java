@@ -1,6 +1,6 @@
 package io.ignice.c17n.gfx;
 
-import lombok.NonNull;
+import io.ignice.c17n.util.SanityOps;
 
 /**
  * http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html
@@ -15,11 +15,32 @@ import lombok.NonNull;
  * _____  _____  __  __  __
  * 0A 00  0A 00  91  00  00
  */
-public record LogicalScreenDescriptor(@NonNull CanvasWidth width,
-                                      @NonNull CanvasHeight height) implements ByteStreamSource {
+public record LogicalScreenDescriptor(CanvasWidth canvasWidth,
+                                      CanvasHeight canvasHeight,
+                                      PackedField packedField,
+                                      byte backgroundColorIndex,
+                                      byte pixelAspectRatio) implements ByteStreamSource {
+
+    public LogicalScreenDescriptor {
+        SanityOps.requireNonNull(canvasWidth, "canvasWidth");
+        SanityOps.requireNonNull(canvasHeight, "canvasHeight");
+        SanityOps.requireNonNull(packedField, "packedField");
+        if (!packedField.globalColorTableFlag() && backgroundColorIndex != 0) {
+            throw new IllegalArgumentException("backgroundColorIndex must be 0 if there is no global color table flag");
+        }
+        if (pixelAspectRatio != 0) {
+            throw new IllegalArgumentException("pixelAspectRatio is often unused and should not be set");
+        }
+    }
 
     @Override
     public byte[] bytes() {
-        return ByteMath.concat(width, height);
+        final byte[] bytes = new byte[7];
+
+        final byte[] w = canvasWidth.bytes();
+        final byte[] h = canvasHeight.bytes();
+        final byte[] p = packedField.bytes();
+//        Stream.of()
+        return bytes;
     }
 }

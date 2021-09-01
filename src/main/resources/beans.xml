@@ -7,5 +7,6 @@
 
     <context:annotation-config/>
     <context:component-scan base-package="io.ignice.c17n"/>
+    <bean id="config" class="io.ignice.c17n.Config"/>
 
 </beans>

@@ -1,13 +1,12 @@
 package io.ignice.c17n;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
-import io.r2dbc.h2.H2ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
+import io.r2dbc.spi.Option;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
@@ -20,6 +19,7 @@ import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.reactive.TransactionalOperator;
 
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -28,39 +28,51 @@ import java.util.List;
 @PropertySource("classpath:application.properties")
 public class Config extends AbstractR2dbcConfiguration {
 
-    @Value("${app.token}")
-    private String token;
+    @Value("${database.driver}")
+    private String driver;
 
-    @Lazy
-    @Bean("gateway")
-    public Gateway gateway(DiscordClient client, AppRepository appRepository, TransactionalOperator txOperator) {
-        return new Gateway(client, appRepository, txOperator);
-    }
+    @Value("${database.protocol}")
+    private String protocol;
 
-    @Lazy
-    @Bean("discordClient")
-    public DiscordClient discordClient() {
-        return DiscordClientBuilder.create(token).build();
-    }
+    @Value("${database.host}")
+    private String host;
+
+    @Value("${database.port}")
+    private Integer port;
+
+    @Value("${database.database}")
+    private String database;
+
+    @Value("${database.user}")
+    private String user;
+
+    @Value("${database.password}")
+    private String password;
+
+    @Value("${database.locale}")
+    private String locale;
 
     @Override
     protected List<Object> getCustomConverters() {
 //        return List.of(new UserWriteConverter(), new UserReadConverter());
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Bean
     @Override
     public ConnectionFactory connectionFactory() {
-//        return new PostgresqlConnectionFactory(
-//                PostgresqlConnectionConfiguration.builder()
-//                        .host("localhost")
-//                        .database("test")
-//                        .username("user")
-//                        .password("password")
-//                        .build()
-//        );
-        return H2ConnectionFactory.inMemory("database");
+        return ConnectionFactories.find(ConnectionFactoryOptions.builder()
+                .option(ConnectionFactoryOptions.DRIVER, driver)
+//                .option(ConnectionFactoryOptions.PROTOCOL, protocol)
+                .option(ConnectionFactoryOptions.HOST, host)
+                .option(ConnectionFactoryOptions.PORT, port)
+                .option(ConnectionFactoryOptions.DATABASE, database)
+                .option(ConnectionFactoryOptions.USER, user)
+                .option(ConnectionFactoryOptions.PASSWORD, password)
+                .option(Option.valueOf("lock_timeout"), "10s")
+                .option(Option.valueOf("statement_timeout"), "5m")
+                .option(Option.valueOf("locale"), locale)
+                .build());
     }
 
     @Bean

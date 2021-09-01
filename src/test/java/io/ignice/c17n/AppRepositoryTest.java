@@ -13,14 +13,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
+import org.springframework.r2dbc.connection.R2dbcTransactionManager;
+import org.springframework.r2dbc.connection.init.CompositeDatabasePopulator;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
+import org.springframework.r2dbc.core.binding.BindMarkersFactory;
+import org.springframework.r2dbc.core.binding.BindMarkersFactoryResolver;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.ReactiveTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.test.StepVerifier;
@@ -28,6 +38,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 @SpringJUnitConfig
@@ -47,7 +58,7 @@ class AppRepositoryTest {
     }
 
     /**
-     * Contains the contents of src/main/resources/schema.sql to rebuild the database between tests.
+     * Contains the contents of src/main/resources/schema_h2.sql to rebuild the database between tests.
      */
     private String schemaSql;
 
@@ -74,19 +85,54 @@ class AppRepositoryTest {
     private R2dbcEntityTemplate template;
 
     @Configuration
+    @EnableR2dbcRepositories
+    @EnableTransactionManagement
     @ComponentScan("io.ignice.c17n")
-    @Import(io.ignice.c17n.Config.class)
-    static class TestConfig extends AbstractR2dbcConfiguration {
+    @PropertySource("classpath:application-test.properties")
+    static class TestConfig extends AbstractR2dbcConfiguration implements BindMarkersFactoryResolver.BindMarkerFactoryProvider {
+
+        @Override
+        protected List<Object> getCustomConverters() {
+            return Collections.emptyList();
+        }
+
         @Bean
         @Override
         public ConnectionFactory connectionFactory() {
+            // todo: see example on https://r2dbc.io/
+//        return ConnectionFactories.get("r2dbc:h2:mem:///testdb");
             return H2ConnectionFactory.inMemory("database");
+        }
+
+        @Bean
+        public ReactiveTransactionManager transactionManager(ConnectionFactory connectionFactory) {
+            return new R2dbcTransactionManager(connectionFactory);
+        }
+
+        @Bean
+        public TransactionalOperator transactionalOperator(ReactiveTransactionManager transactionManager) {
+            return TransactionalOperator.create(transactionManager);
+        }
+
+        @Bean
+        public ConnectionFactoryInitializer initializer(ConnectionFactory connectionFactory) {
+            final ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
+            initializer.setConnectionFactory(connectionFactory);
+            final CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
+            populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("schema_h2.sql")));
+            initializer.setDatabasePopulator(populator);
+            return initializer;
+        }
+
+        @Override
+        public BindMarkersFactory getBindMarkers(ConnectionFactory connectionFactory) {
+            return BindMarkersFactoryResolver.resolve(connectionFactory);
         }
     }
 
     @BeforeAll
     void beforeAll() throws IOException {
-        schemaSql = Files.readString(Path.of(new ClassPathResource("schema.sql").getURI()));
+        schemaSql = Files.readString(Path.of(new ClassPathResource("schema_h2.sql").getURI()));
         dropSql = Files.readString(Path.of(new ClassPathResource("drop.sql").getURI()));
     }
 
@@ -208,9 +254,10 @@ class AppRepositoryTest {
 
     @Test
     void clientEnforcesNonNegativeWallet() {
-        StepVerifier.create(repository.save(User.of(Snowflake.of(5L), -1L))
-                        .then(repository.findUserBySnowflake(Snowflake.of(5L))))
-                .verifyError(IllegalArgumentException.class);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> User.of(Snowflake.of(5L), -1L));
+//        StepVerifier.create(repository.save(User.of(Snowflake.of(5L), -1L))
+//                        .then(repository.findUserBySnowflake(Snowflake.of(5L))))
+//                .verifyError(IllegalArgumentException.class);
     }
 
     @Test
