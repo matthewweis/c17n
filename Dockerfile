@@ -30,6 +30,7 @@
 #ADD target/c17n-jar-with-dependencies.jar c17n-jar-with-dependencies.jar
 #EXPOSE 8080
 #RUN ./mvnw clean package exec:java
+RUN ./mvnw clean package exec:java
 #ENTRYPOINT ["java", "-jar", "c17n-jar-with-dependencies.jar", "null"]
 #ENTRYPOINT java -jar target/c17n-jar-with-dependencies.jar $SECRET_TOKEN
 #ENTRYPOINT SECRET_TOKEN="$(< /run/secrets/SECRET_TOKEN)" && echo $SECRET_TOKEN && java -jar target/c17n-jar-with-dependencies.jar $SECRET_TOKEN
@@ -42,15 +43,20 @@ COPY use_secret.sh ./
 # Mount the secret to /run/secrets:
 # RUN ls
 # RUN chmod +x use_secret.sh
-RUN --mount=type=secret,id=SECRET_TOKEN cat /run/secrets/SECRET_TOKEN
+
+# TODO NEED THIS?
+#RUN --mount=type=secret,id=SECRET_TOKEN cat /run/secrets/SECRET_TOKEN
+
 #ARG TOKEN
 #./mvnw clean compile exec:java package -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
 #./mvnw clean compile exec:java -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+
 CMD ["./mvnw", "clean", "package"]
 ADD target/c17n-jar-with-dependencies.jar c17n-jar-with-dependencies.jar
 EXPOSE 8080
 #ENTRYPOINT [ "sh", "-c", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN" ]
-ENTRYPOINT ["sh", "-c", "SECRET_TOKEN=\"$(< /run/secrets/SECRET_TOKEN)\"", "&&", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN"]
+ENTRYPOINT ["sh", "-c", "ls /run/secrets", "&&", "SECRET_TOKEN=\"$(< /run/secrets/SECRET_TOKEN)\"", "&&", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN"]
+#ENTRYPOINT ["sh", "-c", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN"]
 #ENTRYPOINT ["java", "-cp", "c17n-jar-with-dependencies.jar", "io.ignice.c17n.Launcher"]
 
 #FROM openjdk:16-alpine

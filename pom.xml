@@ -85,6 +85,18 @@
         </developer>
     </developers>
 
+    <repositories>
+<!--        <repository>-->
+<!--            <id>jitpack.io</id>-->
+<!--            <url>https://jitpack.io</url>-->
+<!--        </repository>-->
+        <!-- url -->
+        <repository>
+            <id>m2.dv8tion.net</id>
+            <url>https://m2.dv8tion.net/releases</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- discord4j -->
         <dependency>
@@ -137,7 +149,6 @@
             <artifactId>r2dbc-postgresql</artifactId>
             <version>${r2dbc-postgresql.version}</version>
             <scope>runtime</scope>
-<!--            <version>0.8.8.RELEASE</version>-->
             <exclusions>
                 <exclusion>
                     <groupId>io.projectreactor</groupId>
@@ -232,6 +243,23 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- audio -->
+        <dependency>
+            <groupId>com.sedmelluq</groupId>
+            <artifactId>lavaplayer</artifactId>
+            <version>1.3.77</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>

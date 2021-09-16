@@ -1,7 +1,11 @@
 package io.ignice.c17n;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import discord4j.voice.AudioProvider;
 import io.ignice.c17n.util.SanityOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,10 +58,16 @@ public class Launcher {
         }
         final Client launcher = new Client();
         try (final ConfigurableApplicationContext config = new AnnotationConfigApplicationContext(Config.class)) {
-            final DiscordClient client = DiscordClientBuilder.create(readAndTryEraseToken(args)).build();
-            final AppRepository repository = config.getBean(AppRepository.class);
-            final TransactionalOperator txOperator = config.getBean(TransactionalOperator.class);
-            final Gateway gateway = new Gateway(client, repository, txOperator);
+            // STEPS MUST OCCUR IN ORDER
+            final AudioPlayerManager audioPlayerManager = config.getBean(AudioPlayerManager.class);
+            AudioSourceManagers.registerRemoteSources(audioPlayerManager); // STEP 1
+            final AudioProvider audioProvider = config.getBean(AudioProvider.class);
+            final DiscordClient client = DiscordClientBuilder.create(readAndTryEraseToken(args)).build(); // STEP 2
+//            final AppRepository repository = config.getBean(AppRepository.class);
+//            final TransactionalOperator txOperator = config.getBean(TransactionalOperator.class);
+            final AudioLoadResultHandler audioLoadResultHandler = config.getBean(AudioLoadResultHandler.class);
+//            final Gateway gateway = new Gateway(audioProvider, audioLoadResultHandler, audioPlayerManager, client, repository, txOperator);
+            final Gateway gateway = new Gateway(audioProvider, audioLoadResultHandler, audioPlayerManager, client);
             launcher.run(gateway);
         } catch (Throwable throwable) {
             log.error("A fatal error occurred on the main thread.", throwable);
