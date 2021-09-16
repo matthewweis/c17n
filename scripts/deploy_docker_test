@@ -5,39 +5,97 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+cd ..
+
+#!/bin/bash
+
+# https://unix.stackexchange.com/a/181938
+
+# create temporary file
+#tmpfile=$(mktemp /tmp/io.ignice.c17n.SECRET_TOKEN)
+temp_file=$(mktemp)
+#trap "rm -f $temp_file" 0 2 3 15
+echo "$1" > $temp_file
+
+# create file descriptor 3 for writing to a temporary file so that
+# echo ... >&3 writes to that file
+#exec 3>"$tmpfile"
+
+# create file descriptor 4 for reading from the same file so that
+# the file seek positions for reading and writing can be different
+#exec 4<"$tmpfile"
+
+# delete temp file; the directory entry is deleted at once; the reference counter
+# of the inode is decremented only after the file descriptor has been closed.
+# The file content blocks are deallocated (this is the real deletion) when the
+# reference counter drops to zero.
+#rm "$tmpfile"
+
+# example of writing to file descriptor
+#echo "$1" >&3
+
+echo "HERE1!!"
+ls
+cat $temp_file
+
 #docker build -f Dockerfile -t c17n .
 
 # single node swarm
 #docker swarm join
 
-cd ..
 ./mvnw clean package -DskipTests
 mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
-#docker-compose build --no-cache --build-args TOKEN=$1
-echo '2'
-docker swarm leave --force
-echo '3'
-docker swarm init --force-new-cluster
-echo '4'
-docker network create --driver=overlay --attachable c17network
-echo '5'
-#docker service create --name postgres
-docker-compose run db
-echo "$1" | docker secret create SECRET_TOKEN -
-#docker-compose run app --secret SECRET_TOKEN
-docker-compose run app --secret SECRET_TOKEN --env SECRET_TOKEN="/run/secrets/postgres-password"
+
+# prerequisites for secrets:
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
+chmod +x use_secret.sh
+
+# compose example
+#docker-compose build --progress=plain --no-cache 2>&1 | grep Secret
+
+# docker example
+DOCKER_BUILDKIT=1 docker build --no-cache -t c17n -f Dockerfile --secret id=SECRET_TOKEN,src=$temp_file --progress=plain .
+#DOCKER_BUILDKIT=1 docker stack up --prune -c docker-compose.yml --secret id=SECRET_TOKEN,src=$temp_file --progress=plain .
 #docker stack up --prune -c docker-compose.yml c17n
+#docker-compose run app
+#docker-compose run db
+#docker-compose build app --secret SECRET_TOKEN
+#docker-compose run app --secret SECRET_TOKEN
 
-#docker-compose build --no-cache
-#docker-compose up --force-recreate --env
+##docker-compose build --no-cache --build-args TOKEN=$1
+#echo '2'
+#docker swarm leave --force
+#echo '3'
+#docker swarm init --force-new-cluster
+#echo '4'
+#docker network create --driver=overlay --attachable c17network
+#echo '5'
+##docker service create --name postgres
+#docker-compose run db
+#echo "$1" | docker secret create SECRET_TOKEN -
+##docker-compose run app --secret SECRET_TOKEN
+##docker stack up --prune -c docker-compose.yml c17n
+#docker-compose run app --secret SECRET_TOKEN --env SECRET_TOKEN="/run/secrets/postgres-password"
+#
+##docker-compose build --no-cache
+##docker-compose up --force-recreate --env
+#
+##docker-compose build --no-cache
+##docker-compose up --force-recreate -e "TOKEN=$1"
+#
+##cd ..
+###./mvnw clean compile exec:java package -DskipTests -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+##./mvnw clean package -DskipTests -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+### extract libraries from fat jar
+##mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+##docker-compose build --no-cache
+##docker-compose up --force-recreate
 
-#docker-compose build --no-cache
-#docker-compose up --force-recreate -e "TOKEN=$1"
-
-#cd ..
-##./mvnw clean compile exec:java package -DskipTests -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
-#./mvnw clean package -DskipTests -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
-## extract libraries from fat jar
-#mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
-#docker-compose build --no-cache
-#docker-compose up --force-recreate
+#
+## reading from that file descriptor
+#head -n 1 <&4
+#
+## close the file descriptor (done automatically when script exits)
+#exec 3>-

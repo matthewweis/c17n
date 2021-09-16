@@ -1,41 +1,56 @@
+# syntax=docker/dockerfile:1.2
+
 # see:
 # https://www.javacodegeeks.com/2020/03/docker-compose-for-spring-boot-application-with-postgresql.html
 
 # fatjar method
-FROM openjdk:16-alpine
-MAINTAINER Ignice
-ARG SECRET_TOKEN
-RUN echo "HELLO WORLD!"
-RUN echo $SECRET_TOKEN
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline
-COPY src ./src
-#ENV SECRET_TOKEN
+#FROM openjdk:16-alpine
+#MAINTAINER Ignice
+#ARG SECRET_TOKEN
+#COPY use_secret.sh ./
+## Mount the secret to /run/secrets:
+## RUN ls
+## RUN chmod +x use_secret.sh
+#RUN --mount=type=secret,id=SECRET_TOKEN cat /run/secrets/SECRET_TOKEN
+## RUN --mount=type=secret,id=SECRET_TOKEN use_secret.sh cat /run/secrets/SECRET_TOKEN
+#
+#COPY .mvn/ .mvn
+#COPY mvnw pom.xml ./
+#RUN ./mvnw dependency:go-offline
+#COPY src ./src
+##ENV SECRET_TOKEN
 
 #./mvnw clean compile exec:java package -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
 #RUN ["./mvnw", "clean", "test"]
 #RUN ["./mvnw", "clean", "package"]
 
-RUN #./mvnw clean test package
-RUN ./mvnw clean test package
+#RUN ./mvnw clean test package
+#RUN ./mvnw clean compile test package
 
 #ADD target/c17n-jar-with-dependencies.jar c17n-jar-with-dependencies.jar
-EXPOSE 8080
+#EXPOSE 8080
 #RUN ./mvnw clean package exec:java
 #ENTRYPOINT ["java", "-jar", "c17n-jar-with-dependencies.jar", "null"]
 #ENTRYPOINT java -jar target/c17n-jar-with-dependencies.jar $SECRET_TOKEN
-ENTRYPOINT java -jar target/c17n-jar-with-dependencies.jar $SECRET_TOKEN
-#ENTRYPOINT [ "sh", "-c", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN" ]
+#ENTRYPOINT SECRET_TOKEN="$(< /run/secrets/SECRET_TOKEN)" && echo $SECRET_TOKEN && java -jar target/c17n-jar-with-dependencies.jar $SECRET_TOKEN
+#ENTRYPOINT [ "sh", "-c", "java", "-jar", "target/c17n-jar-with-dependencies.jar", "$SECRET_TOKEN" ]
 
-#FROM openjdk:16-alpine
-#MAINTAINER Ignice
+FROM openjdk:16-alpine
+MAINTAINER Ignice
+ARG SECRET_TOKEN
+COPY use_secret.sh ./
+# Mount the secret to /run/secrets:
+# RUN ls
+# RUN chmod +x use_secret.sh
+RUN --mount=type=secret,id=SECRET_TOKEN cat /run/secrets/SECRET_TOKEN
 #ARG TOKEN
-##./mvnw clean compile exec:java package -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
-##CMD ["./mvnw", "clean", "package", "-Dapp.token=\"$token\""]
-#ADD target/c17n-jar-with-dependencies.jar c17n-jar-with-dependencies.jar
-#EXPOSE 8080
-#ENTRYPOINT ["java", "-jar", "c17n-jar-with-dependencies.jar", "$TOKEN"]
+#./mvnw clean compile exec:java package -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+#./mvnw clean compile exec:java -Dexec.mainClass="io.ignice.c17n.Launcher" -Dapp.token="$1"
+CMD ["./mvnw", "clean", "package"]
+ADD target/c17n-jar-with-dependencies.jar c17n-jar-with-dependencies.jar
+EXPOSE 8080
+#ENTRYPOINT [ "sh", "-c", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN" ]
+ENTRYPOINT ["sh", "-c", "SECRET_TOKEN=\"$(< /run/secrets/SECRET_TOKEN)\"", "&&", "java", "-jar", "c17n-jar-with-dependencies.jar", "$SECRET_TOKEN"]
 #ENTRYPOINT ["java", "-cp", "c17n-jar-with-dependencies.jar", "io.ignice.c17n.Launcher"]
 
 #FROM openjdk:16-alpine
@@ -50,7 +65,7 @@ ENTRYPOINT java -jar target/c17n-jar-with-dependencies.jar $SECRET_TOKEN
 #COPY ${DEPENDENCY}/BOOT-INF/classes /app
 #ENTRYPOINT ["java", "-cp", "c17n.jar", "io.ignice.c17n.Launcher"]
 
-#
+
 #ADD target/c17n.jar c17n.jar
 #ADD target/c17n.jar c17n.jar
 # todo have fatjar way and other way

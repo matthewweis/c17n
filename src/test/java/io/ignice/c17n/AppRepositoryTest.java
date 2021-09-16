@@ -255,9 +255,6 @@ class AppRepositoryTest {
     @Test
     void clientEnforcesNonNegativeWallet() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> User.of(Snowflake.of(5L), -1L));
-//        StepVerifier.create(repository.save(User.of(Snowflake.of(5L), -1L))
-//                        .then(repository.findUserBySnowflake(Snowflake.of(5L))))
-//                .verifyError(IllegalArgumentException.class);
     }
 
     @Test

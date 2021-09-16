@@ -1,6 +1,11 @@
 package io.ignice.c17n.gfx;
 
+import discord4j.core.util.ArrayUtil;
+import io.ignice.c17n.util.ArrayOps;
 import io.ignice.c17n.util.SanityOps;
+
+import java.nio.ByteBuffer;
+import java.util.stream.Stream;
 
 /**
  * http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html
@@ -29,18 +34,19 @@ public record LogicalScreenDescriptor(CanvasWidth canvasWidth,
             throw new IllegalArgumentException("backgroundColorIndex must be 0 if there is no global color table flag");
         }
         if (pixelAspectRatio != 0) {
-            throw new IllegalArgumentException("pixelAspectRatio is often unused and should not be set");
+            throw new IllegalArgumentException("pixelAspectRatio is often ignored by programs and should not be set");
         }
     }
 
     @Override
     public byte[] bytes() {
-        final byte[] bytes = new byte[7];
-
+        // todo single buffer
         final byte[] w = canvasWidth.bytes();
         final byte[] h = canvasHeight.bytes();
         final byte[] p = packedField.bytes();
-//        Stream.of()
-        return bytes;
+        final byte[] bci = new byte[] { backgroundColorIndex };
+        final byte[] par = new byte[] { pixelAspectRatio };
+        return Stream.of(w, h, p, bci, par).reduce(ByteMath::concat).orElseThrow();
+                //.orElseGet(() -> new byte[0]);
     }
 }

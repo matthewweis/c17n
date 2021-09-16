@@ -1,7 +1,11 @@
 package io.ignice.c17n.gfx;
 
+import lombok.NonNull;
+
 //http://giflib.sourceforge.net/whatsinagif/bits_and_bytes.html
-public class GIF {
+public record GIF(@NonNull Header header,
+                  @NonNull LogicalScreenDescriptor logicalScreenDescriptor,
+                  @NonNull GlobalColorTable globalColorTable) {
 
     // TODO WARNING: NEED TO SWAP TO LITTLE ENDIAN ORDER
     // TODO WARNING: NEED TO SWAP TO LITTLE ENDIAN ORDER

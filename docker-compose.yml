@@ -3,7 +3,7 @@ version: '3.1'
 secrets:
   SECRET_TOKEN:
     external: true
-
+# todo make postgres user/pw a SECRET
 services:
   db:
     image: "postgres"
@@ -14,12 +14,13 @@ services:
       - POSTGRES_USER=c17n
       - POSTGRES_PASSWORD=c17n
   app:
-    image: openjdk:16-alpine
-#    build:
-#      context: .
+    build: .
+    environment:
+      - DOCKER_BUILDKIT=1
+      - SPRING_PROFILES_ACTIVE
+    secrets:
+      - SECRET_TOKEN
     ports:
       - "9000:8080"
-    environment:
-      - SECRET_TOKEN
     depends_on:
       - db

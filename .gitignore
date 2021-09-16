@@ -1,5 +1,6 @@
 # discord (hidden folder for local private key storage)
 .hidden/
+.use_secret.sh
 
 # java
 *.class

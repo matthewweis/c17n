@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- trigger
-CREATE TRIGGER set_timestamp
+DROP TRIGGER IF EXISTS set_timestamp ON users;
+CREATE OR REPLACE TRIGGER set_timestamp
     BEFORE UPDATE ON users
     FOR EACH ROW
     EXECUTE PROCEDURE update_timestamp();
