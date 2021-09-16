@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd ..
+./mvnw clean
+yes | docker system prune
+yes | docker image prune
+yes | docker volume prune
